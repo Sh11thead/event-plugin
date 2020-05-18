@@ -66,6 +66,26 @@ public class KafkaEventListener implements IPluginEventListener {
     }
 
     @Override
+    public void handleBlockErasedEvent(Object data) {
+        if (Objects.isNull(data)){
+            return;
+        }
+
+        MessageSenderImpl.getInstance().getTriggerQueue().offer(data);
+
+    }
+
+    @Override
+    public void handleTRC20Event(Object data, boolean isSolidity) {
+        if (Objects.isNull(data)){
+            return;
+        }
+
+        MessageSenderImpl.getInstance().getTriggerQueue().offer(data);
+
+    }
+
+    @Override
     public void handleContractLogTrigger(Object data) {
         if (Objects.isNull(data)){
             return;

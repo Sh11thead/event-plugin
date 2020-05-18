@@ -82,4 +82,24 @@ public class MongodbEventListener implements IPluginEventListener {
 
         MongodbSenderImpl.getInstance().getTriggerQueue().offer(data);
     }
+
+    @Override
+    public void handleBlockErasedEvent(Object data) {
+        if (Objects.isNull(data)){
+            return;
+        }
+
+        MongodbSenderImpl.getInstance().getTriggerQueue().offer(data);
+
+    }
+
+    @Override
+    public void handleTRC20Event(Object data, boolean isSolidity) {
+        if (Objects.isNull(data)){
+            return;
+        }
+
+        MongodbSenderImpl.getInstance().getTriggerQueue().offer(data);
+
+    }
 }
