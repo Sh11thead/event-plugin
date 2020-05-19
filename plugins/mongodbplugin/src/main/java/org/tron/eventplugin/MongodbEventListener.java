@@ -94,7 +94,7 @@ public class MongodbEventListener implements IPluginEventListener {
     }
 
     @Override
-    public void handleTRC20Event(Object data, boolean isSolidity) {
+    public void handleTRC20Event(Object data) {
         if (Objects.isNull(data)){
             return;
         }

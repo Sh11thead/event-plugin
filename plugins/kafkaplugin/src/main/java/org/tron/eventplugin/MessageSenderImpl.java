@@ -26,6 +26,11 @@ public class MessageSenderImpl{
     private String contractLogTopic = "";
     private String solidityTopic = "";
 
+    private String trc20TrackerTopic = "";
+    private String trc20SolidityTrackerTopic = "";
+    private String blockErasedTopic = "";
+
+
     private Thread triggerProcessThread;
     private boolean isRunTriggerProcessThread = true;
 
@@ -56,6 +61,9 @@ public class MessageSenderImpl{
         createProducer(Constant.TRANSACTION_TRIGGER);
         createProducer(Constant.CONTRACTLOG_TRIGGER);
         createProducer(Constant.CONTRACTEVENT_TRIGGER);
+        createProducer(Constant.TRC20TRACKER_TRIGGER);
+        createProducer(Constant.TRC20TRACKER_SOLIDITY_TRIGGER);
+        createProducer(Constant.BLOCK_ERASE_TRIGGER);
 
         triggerProcessThread = new Thread(triggerProcessLoop);
         triggerProcessThread.start();
@@ -78,6 +86,15 @@ public class MessageSenderImpl{
         }
         else if (triggerType == Constant.SOLIDITY_TRIGGER) {
             solidityTopic = topic;
+        }
+        else if (triggerType == Constant.TRC20TRACKER_TRIGGER) {
+            trc20TrackerTopic = topic;
+        }
+        else if (triggerType == Constant.TRC20TRACKER_SOLIDITY_TRIGGER) {
+            trc20SolidityTrackerTopic = topic;
+        }
+        else if (triggerType == Constant.BLOCK_ERASE_TRIGGER) {
+            blockErasedTopic = topic;
         }
     }
 
@@ -186,6 +203,26 @@ public class MessageSenderImpl{
         MessageSenderImpl.getInstance().sendKafkaRecord(Constant.SOLIDITY_TRIGGER, contractEventTopic, data);
     }
 
+    public void handlTrc20Trigger(Object data) {
+        if (Objects.isNull(data) || Objects.isNull(trc20TrackerTopic)){
+            return;
+        }
+        MessageSenderImpl.getInstance().sendKafkaRecord(Constant.TRC20TRACKER_TRIGGER, trc20TrackerTopic, data);
+    }
+    public void handleTrc20SolidityTrigger(Object data) {
+        if (Objects.isNull(data) || Objects.isNull(trc20SolidityTrackerTopic)){
+            return;
+        }
+        MessageSenderImpl.getInstance().sendKafkaRecord(Constant.TRC20TRACKER_SOLIDITY_TRIGGER, trc20SolidityTrackerTopic, data);
+    }
+    public void handleBlockEraseTrigger(Object data) {
+        if (Objects.isNull(data) || Objects.isNull(blockErasedTopic)){
+            return;
+        }
+        MessageSenderImpl.getInstance().sendKafkaRecord(Constant.BLOCK_ERASE_TRIGGER, blockErasedTopic, data);
+    }
+
+
     private Runnable triggerProcessLoop =
             () -> {
                 while (isRunTriggerProcessThread) {
@@ -210,6 +247,15 @@ public class MessageSenderImpl{
                         }
                         else if (triggerData.contains(Constant.SOLIDITY_TRIGGER_NAME)) {
                             handleSolidityTrigger(triggerData);
+                        }
+                        else if (triggerData.contains(Constant.TRC20TRACKER_TRIGGER_NAME)) {
+                            handlTrc20Trigger(triggerData);
+                        }
+                        else if (triggerData.contains(Constant.TRC20TRACKER_SOLIDITY_TRIGGER_NAME)) {
+                            handleTrc20SolidityTrigger(triggerData);
+                        }
+                        else if (triggerData.contains(Constant.BLOCK_ERASE_TRIGGER_NAME)) {
+                            handleBlockEraseTrigger(triggerData);
                         }
                     } catch (InterruptedException ex) {
                         log.info(ex.getMessage());

@@ -69,6 +69,10 @@ public class PluginLauncher {
             listener.setTopic(Trigger.TRANSACTION_TRIGGER, "transaction");
             listener.setTopic(Trigger.CONTRACTEVENT_TRIGGER, "contractevent");
             listener.setTopic(Trigger.CONTRACTLOG_TRIGGER, "contractlog");
+            listener.setTopic(Trigger.BLOCK_ERASE_TRIGGER, "blockErased");
+            listener.setTopic(Trigger.TRC20TRACKER_TRIGGER, "trc20Tracker");
+            listener.setTopic(Trigger.TRC20TRACKER_SOLIDITY_TRIGGER, "trc20TrackerSolidity");
+
         });
 
         eventListeners.forEach(listener -> {

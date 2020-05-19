@@ -31,6 +31,11 @@ public class MongodbSenderImpl{
     private String contractLogTopic = "";
     private String solidityTopic = "";
 
+    private String trc20TrackerTopic = "";
+    private String trc20SolidityTrackerTopic = "";
+    private String blockErasedTopic = "";
+
+
     private Thread triggerProcessThread;
     private boolean isRunTriggerProcessThread = true;
 
@@ -137,6 +142,15 @@ public class MongodbSenderImpl{
 
         mongoManager.createCollection(solidityTopic);
         createMongoTemplate(solidityTopic);
+
+        mongoManager.createCollection(trc20TrackerTopic);
+        createMongoTemplate(trc20TrackerTopic);
+
+        mongoManager.createCollection(trc20SolidityTrackerTopic);
+        createMongoTemplate(trc20SolidityTrackerTopic);
+
+        mongoManager.createCollection(blockErasedTopic);
+        createMongoTemplate(blockErasedTopic);
     }
 
     private void loadMongoConfig(){
@@ -212,6 +226,15 @@ public class MongodbSenderImpl{
             contractLogTopic = topic;
         } else if (triggerType == Constant.SOLIDITY_TRIGGER) {
             solidityTopic = topic;
+        }
+        else if (triggerType == Constant.TRC20TRACKER_TRIGGER) {
+            trc20TrackerTopic = topic;
+        }
+        else if (triggerType == Constant.TRC20TRACKER_SOLIDITY_TRIGGER) {
+            trc20SolidityTrackerTopic = topic;
+        }
+        else if (triggerType == Constant.BLOCK_ERASE_TRIGGER) {
+            blockErasedTopic = topic;
         }
         else {
             return;
@@ -317,6 +340,58 @@ public class MongodbSenderImpl{
         }
     }
 
+
+    public void handleTrc20Trigger(Object data) {
+        if (Objects.isNull(data) || Objects.isNull(trc20TrackerTopic)){
+            return;
+        }
+
+        MongoTemplate template = mongoTemplateMap.get(trc20TrackerTopic);
+        if (Objects.nonNull(template)) {
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    template.addEntity((String)data);
+                }
+            });
+        }
+    }
+
+
+    public void handleTrc20SolidityTrigger(Object data) {
+        if (Objects.isNull(data) || Objects.isNull(trc20SolidityTrackerTopic)){
+            return;
+        }
+
+        MongoTemplate template = mongoTemplateMap.get(trc20SolidityTrackerTopic);
+        if (Objects.nonNull(template)) {
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    template.addEntity((String)data);
+                }
+            });
+        }
+    }
+
+
+    public void handleBlockEraseTrigger(Object data) {
+        if (Objects.isNull(data) || Objects.isNull(blockErasedTopic)){
+            return;
+        }
+
+        MongoTemplate template = mongoTemplateMap.get(blockErasedTopic);
+        if (Objects.nonNull(template)) {
+            service.execute(new Runnable() {
+                @Override
+                public void run() {
+                    template.addEntity((String)data);
+                }
+            });
+        }
+    }
+
+
     private Runnable triggerProcessLoop =
             () -> {
                 while (isRunTriggerProcessThread) {
@@ -341,6 +416,16 @@ public class MongodbSenderImpl{
                         } else if (triggerData.contains(Constant.SOLIDITY_TRIGGER_NAME)) {
                             handleSolidityTrigger(triggerData);
                         }
+                        else if (triggerData.contains(Constant.TRC20TRACKER_TRIGGER_NAME)) {
+                            handleTrc20Trigger(triggerData);
+                        }
+                        else if (triggerData.contains(Constant.TRC20TRACKER_SOLIDITY_TRIGGER_NAME)) {
+                            handleTrc20SolidityTrigger(triggerData);
+                        }
+                        else if (triggerData.contains(Constant.BLOCK_ERASE_TRIGGER_NAME)) {
+                            handleBlockEraseTrigger(triggerData);
+                        }
+
                     } catch (InterruptedException ex) {
                         log.info(ex.getMessage());
                         Thread.currentThread().interrupt();
