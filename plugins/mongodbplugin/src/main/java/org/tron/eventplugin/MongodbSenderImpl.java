@@ -368,7 +368,17 @@ public class MongodbSenderImpl{
             service.execute(new Runnable() {
                 @Override
                 public void run() {
-                    template.addEntity((String)data);
+                    // template.addEntity((String)data);
+                    try {
+                        String dataStr = (String)data;
+                        JSONObject jsStr = JSONObject.parseObject(dataStr);
+                        String blockHash = jsStr.getString("blockHash");
+                        if (StringUtils.isNotNullOrEmpty(blockHash)) {
+                            template.update("solidity",new Boolean(true),"blockHash",blockHash);
+                        }
+                    } catch (Exception ex) {
+                        log.error("unknown exception happened in parse object ", ex);
+                    }
                 }
             });
         }
