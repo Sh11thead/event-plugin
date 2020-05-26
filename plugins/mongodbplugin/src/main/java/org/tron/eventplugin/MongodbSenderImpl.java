@@ -363,7 +363,8 @@ public class MongodbSenderImpl{
             return;
         }
 
-        MongoTemplate template = mongoTemplateMap.get(trc20SolidityTrackerTopic);
+        //MongoTemplate template = mongoTemplateMap.get(trc20SolidityTrackerTopic);
+        MongoTemplate template = mongoTemplateMap.get(trc20TrackerTopic);
         if (Objects.nonNull(template)) {
             service.execute(new Runnable() {
                 @Override
