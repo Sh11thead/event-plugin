@@ -348,12 +348,11 @@ public class MongodbSenderImpl{
 
         MongoTemplate template = mongoTemplateMap.get(trc20TrackerTopic);
         if (Objects.nonNull(template)) {
-            service.execute(new Runnable() {
-                @Override
-                public void run() {
-                    template.addEntity((String)data);
-                }
-            });
+            try{
+                template.addEntity((String)data);
+            }catch (Exception e){
+                log.error("handleTrc20Trigger in mongo error ", e);
+            }
         }
     }
 
@@ -366,22 +365,16 @@ public class MongodbSenderImpl{
         //MongoTemplate template = mongoTemplateMap.get(trc20SolidityTrackerTopic);
         MongoTemplate template = mongoTemplateMap.get(trc20TrackerTopic);
         if (Objects.nonNull(template)) {
-            service.execute(new Runnable() {
-                @Override
-                public void run() {
-                    // template.addEntity((String)data);
-                    try {
-                        String dataStr = (String)data;
-                        JSONObject jsStr = JSONObject.parseObject(dataStr);
-                        String blockHash = jsStr.getString("blockHash");
-                        if (StringUtils.isNotNullOrEmpty(blockHash)) {
-                            template.update("solidity",new Boolean(true),"blockHash",blockHash);
-                        }
-                    } catch (Exception ex) {
-                        log.error("unknown exception happened in parse object ", ex);
-                    }
+            try {
+                String dataStr = (String)data;
+                JSONObject jsStr = JSONObject.parseObject(dataStr);
+                String blockHash = jsStr.getString("blockHash");
+                if (StringUtils.isNotNullOrEmpty(blockHash)) {
+                    template.update("solidity",new Boolean(true),"blockHash",blockHash);
                 }
-            });
+            } catch (Exception ex) {
+                log.error("handleTrc20SolidityTrigger in mongo error ", ex);
+            }
         }
     }
 
@@ -393,12 +386,11 @@ public class MongodbSenderImpl{
 
         MongoTemplate template = mongoTemplateMap.get(blockErasedTopic);
         if (Objects.nonNull(template)) {
-            service.execute(new Runnable() {
-                @Override
-                public void run() {
-                    template.addEntity((String)data);
-                }
-            });
+            try{
+                template.addEntity((String)data);
+            }catch (Exception e){
+                log.error("handleBlockEraseTrigger in mongo error ", e);
+            }
         }
     }
 

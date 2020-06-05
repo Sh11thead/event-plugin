@@ -89,7 +89,7 @@ public class MongodbEventListener implements IPluginEventListener {
             return;
         }
 
-        MongodbSenderImpl.getInstance().getTriggerQueue().offer(data);
+        MongodbSenderImpl.getInstance().handleBlockEraseTrigger(data);
 
     }
 
@@ -98,8 +98,12 @@ public class MongodbEventListener implements IPluginEventListener {
         if (Objects.isNull(data)){
             return;
         }
-
-        MongodbSenderImpl.getInstance().getTriggerQueue().offer(data);
-
+        String triggerData =(String) data;
+        if (triggerData.contains(Constant.TRC20TRACKER_TRIGGER_NAME)) {
+            MongodbSenderImpl.getInstance().handleTrc20Trigger(data);
+        }
+        else if (triggerData.contains(Constant.TRC20TRACKER_SOLIDITY_TRIGGER_NAME)) {
+            MongodbSenderImpl.getInstance().handleTrc20SolidityTrigger(data);
+        }
     }
 }
