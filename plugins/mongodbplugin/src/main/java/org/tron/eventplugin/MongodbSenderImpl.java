@@ -352,6 +352,7 @@ public class MongodbSenderImpl{
                 template.addEntity((String)data);
             }catch (Exception e){
                 log.error("handleTrc20Trigger in mongo error ", e);
+                throw e;
             }
         }
     }
@@ -374,6 +375,7 @@ public class MongodbSenderImpl{
                 }
             } catch (Exception ex) {
                 log.error("handleTrc20SolidityTrigger in mongo error ", ex);
+                throw ex;
             }
         }
     }
@@ -390,6 +392,7 @@ public class MongodbSenderImpl{
                 template.addEntity((String)data);
             }catch (Exception e){
                 log.error("handleBlockEraseTrigger in mongo error ", e);
+                throw e;
             }
         }
     }
