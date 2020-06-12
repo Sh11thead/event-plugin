@@ -34,6 +34,8 @@ public class MongodbSenderImpl{
     private String trc20TrackerTopic = "";
     private String trc20SolidityTrackerTopic = "";
     private String blockErasedTopic = "";
+    private String shieldedTRC20TrackerTopic = "";
+    private String shieldedSolidityTRC20TrackerTopic = "";
 
 
     private Thread triggerProcessThread;
@@ -151,6 +153,12 @@ public class MongodbSenderImpl{
 
         mongoManager.createCollection(blockErasedTopic);
         createMongoTemplate(blockErasedTopic);
+
+        mongoManager.createCollection(shieldedSolidityTRC20TrackerTopic);
+        createMongoTemplate(shieldedSolidityTRC20TrackerTopic);
+
+        mongoManager.createCollection(shieldedTRC20TrackerTopic);
+        createMongoTemplate(shieldedTRC20TrackerTopic);
     }
 
     private void loadMongoConfig(){
@@ -235,6 +243,12 @@ public class MongodbSenderImpl{
         }
         else if (triggerType == Constant.BLOCK_ERASE_TRIGGER) {
             blockErasedTopic = topic;
+        }
+        else if (triggerType == Constant.SHIELDED_TRC20SOLIDITYTRACKER_TRIGGER) {
+            shieldedSolidityTRC20TrackerTopic = topic;
+        }
+        else if (triggerType == Constant.SHIELDED_TRC20TRACKER_TRIGGER) {
+            shieldedTRC20TrackerTopic = topic;
         }
         else {
             return;
@@ -359,7 +373,7 @@ public class MongodbSenderImpl{
 
 
     public void handleTrc20SolidityTrigger(Object data) {
-        if (Objects.isNull(data) || Objects.isNull(trc20SolidityTrackerTopic)){
+        if (Objects.isNull(data) || Objects.isNull(trc20TrackerTopic)){
             return;
         }
 
@@ -379,6 +393,46 @@ public class MongodbSenderImpl{
             }
         }
     }
+
+    public void handleShieldedTrc20Trigger(Object data) {
+        if (Objects.isNull(data) || Objects.isNull(shieldedTRC20TrackerTopic)){
+            return;
+        }
+
+        MongoTemplate template = mongoTemplateMap.get(shieldedTRC20TrackerTopic);
+        if (Objects.nonNull(template)) {
+            try{
+                template.addEntity((String)data);
+            }catch (Exception e){
+                log.error("handleShieldedTrc20Trigger in mongo error ", e);
+                throw e;
+            }
+        }
+    }
+
+
+    public void handleShieldedTrc20SolidityTrigger(Object data) {
+        if (Objects.isNull(data) || Objects.isNull(shieldedTRC20TrackerTopic)){
+            return;
+        }
+
+        //MongoTemplate template = mongoTemplateMap.get(trc20SolidityTrackerTopic);
+        MongoTemplate template = mongoTemplateMap.get(shieldedTRC20TrackerTopic);
+        if (Objects.nonNull(template)) {
+            try {
+                String dataStr = (String)data;
+                JSONObject jsStr = JSONObject.parseObject(dataStr);
+                String blockHash = jsStr.getString("blockHash");
+                if (StringUtils.isNotNullOrEmpty(blockHash)) {
+                    template.update("solidity",new Boolean(true),"blockHash",blockHash);
+                }
+            } catch (Exception ex) {
+                log.error("handleTrc20SolidityTrigger in mongo error ", ex);
+                throw ex;
+            }
+        }
+    }
+
 
 
     public void handleBlockEraseTrigger(Object data) {
@@ -430,6 +484,11 @@ public class MongodbSenderImpl{
                         }
                         else if (triggerData.contains(Constant.BLOCK_ERASE_TRIGGER_NAME)) {
                             handleBlockEraseTrigger(triggerData);
+                        }
+                        else if (triggerData.contains(Constant.SHIELDED_TRC20SOLIDITYTRACKER_TRIGGER_NAME)) {
+                            handleShieldedTrc20SolidityTrigger(triggerData);
+                        }else if (triggerData.contains(Constant.SHIELDED_TRC20TRACKER_TRIGGER_NAME)) {
+                            handleShieldedTrc20Trigger(triggerData);
                         }
 
                     } catch (InterruptedException ex) {

@@ -106,4 +106,18 @@ public class MongodbEventListener implements IPluginEventListener {
             MongodbSenderImpl.getInstance().handleTrc20SolidityTrigger(data);
         }
     }
+
+    @Override
+    public void handleShieldedTRC20Event(Object data) {
+        if (Objects.isNull(data)){
+            return;
+        }
+        String triggerData =(String) data;
+        if (triggerData.contains(Constant.SHIELDED_TRC20TRACKER_TRIGGER_NAME)) {
+            MongodbSenderImpl.getInstance().handleShieldedTrc20Trigger(data);
+        }
+        else if (triggerData.contains(Constant.SHIELDED_TRC20SOLIDITYTRACKER_TRIGGER_NAME)) {
+            MongodbSenderImpl.getInstance().handleShieldedTrc20SolidityTrigger(data);
+        }
+    }
 }

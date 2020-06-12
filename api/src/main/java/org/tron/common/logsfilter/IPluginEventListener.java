@@ -28,5 +28,7 @@ public interface IPluginEventListener extends ExtensionPoint {
 
     void handleTRC20Event(Object trigger);
 
+    void handleShieldedTRC20Event(Object trigger);
+
 
 }
